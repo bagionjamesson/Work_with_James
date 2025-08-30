@@ -1,0 +1,149 @@
+<!DOCTYPE html><html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Book a Call with James</title>
+  <meta name="description" content="Simple funnel: click to book a call with James on Calendly. When you return, you’ll be redirected automatically." />
+  <style>
+    :root {
+      --bg: #0b1021;
+      --card: #151b36;
+      --text: #e8ebff;
+      --muted: #a8b0d9;
+      --accent: #7c9eff;
+      --accent-2: #9c7cff;
+      --shadow: 0 10px 25px rgba(0,0,0,.25);
+    }
+    * { box-sizing: border-box; }
+    html, body { height: 100%; }
+    body {
+      margin: 0;
+      font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, "Helvetica Neue", Arial, "Noto Sans", "Apple Color Emoji", "Segoe UI Emoji";
+      color: var(--text);
+      background: radial-gradient(1200px 800px at 10% 10%, rgba(124,158,255,.15), transparent 40%),
+                  radial-gradient(1000px 800px at 90% 20%, rgba(156,124,255,.12), transparent 45%),
+                  var(--bg);
+      display: grid;
+      place-items: center;
+      padding: 24px;
+    }
+    .card {
+      width: 100%;
+      max-width: 720px;
+      background: linear-gradient(180deg, rgba(255,255,255,.03), rgba(255,255,255,0)) , var(--card);
+      border: 1px solid rgba(255,255,255,.08);
+      border-radius: 20px;
+      box-shadow: var(--shadow);
+      padding: 28px;
+    }
+    .eyebrow {
+      display: inline-block;
+      font-size: 13px;
+      letter-spacing: .12em;
+      text-transform: uppercase;
+      color: var(--muted);
+      background: rgba(124,158,255,.12);
+      border: 1px solid rgba(124,158,255,.25);
+      padding: 6px 10px;
+      border-radius: 999px;
+    }
+    h1 {
+      margin: 14px 0 8px;
+      font-size: clamp(28px, 4vw, 40px);
+      line-height: 1.1;
+    }
+    p { color: var(--muted); font-size: 16px; }
+    .cta {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      margin-top: 16px;
+      font-weight: 600;
+      font-size: 16px;
+      padding: 14px 18px;
+      background: linear-gradient(90deg, var(--accent), var(--accent-2));
+      color: white;
+      border: none;
+      border-radius: 12px;
+      cursor: pointer;
+      box-shadow: 0 8px 20px rgba(124,158,255,.35);
+      transition: transform .08s ease, box-shadow .2s ease, filter .2s ease;
+    }
+    .cta:hover { transform: translateY(-1px); filter: brightness(1.05); }
+    .cta:active { transform: translateY(0); filter: brightness(.98); }
+    .row { display: grid; grid-template-columns: 1fr; gap: 16px; }
+    .note { font-size: 13px; opacity: .9; margin-top: 10px; }
+    .linkish { color: var(--accent); text-decoration: underline; text-decoration-color: rgba(124,158,255,.5); }
+    .footer { margin-top: 22px; border-top: 1px dashed rgba(255,255,255,.12); padding-top: 16px; display: flex; justify-content: space-between; align-items: center; gap: 12px; }
+    code { background: rgba(255,255,255,.06); border: 1px solid rgba(255,255,255,.12); padding: 3px 6px; border-radius: 8px; }
+  </style>
+</head>
+<body>
+  <main class="card" aria-labelledby="title">
+    <span class="eyebrow">Book a call</span>
+    <h1 id="title">Chat with James</h1>
+    <p>Pick a time that works for you. We’ll open Calendly in a new tab. When you come back here, you’ll be taken to the next step automatically.</p><div class="row">
+  <button id="bookBtn" class="cta" type="button" aria-label="Book a call with James">📅 Book a call with James</button>
+  <p class="note">If nothing happens, use this fallback link: <a id="fallbackLink" class="linkish" target="_blank" rel="noopener" href="#">Open Calendly</a></p>
+</div>
+
+<div class="footer">
+  <span>Tip: edit <code>calendlyUrl</code> and <code>redirectUrl</code> in the script below.</span>
+  <a class="linkish" href="#" id="previewNext">Preview next step →</a>
+</div>
+
+  </main>  <script>
+    const calendlyUrl = "https://calendly.com/bagionjamesson23/30min";
+    const redirectUrl = "https://www.gohighlevel.com/?fp_ref=james-son-14";
+
+    document.getElementById('fallbackLink').href = calendlyUrl;
+    document.getElementById('previewNext').href = redirectUrl;
+
+    const CLICK_KEY = 'james_funnel_clicked';
+    const REDIRECTED_KEY = 'james_funnel_redirected';
+
+    const openCalendly = () => {
+      sessionStorage.setItem(CLICK_KEY, '1');
+      sessionStorage.removeItem(REDIRECTED_KEY);
+      window.open(calendlyUrl, '_blank', 'noopener');
+    };
+
+    document.getElementById('bookBtn').addEventListener('click', openCalendly);
+
+    const maybeRedirect = () => {
+      const clicked = sessionStorage.getItem(CLICK_KEY) === '1';
+      const already = sessionStorage.getItem(REDIRECTED_KEY) === '1';
+      const next = window.jamesFunnelNext || redirectUrl;
+      if (clicked && !already) {
+        setTimeout(() => {
+          sessionStorage.setItem(REDIRECTED_KEY, '1');
+          window.location.assign(next);
+        }, 150);
+      }
+    };
+
+    document.addEventListener('visibilitychange', () => {
+      if (document.visibilityState === 'visible') {
+        maybeRedirect();
+      }
+    });
+
+    window.addEventListener('focus', maybeRedirect);
+    window.addEventListener('pageshow', (e) => {
+      if (e.persisted) {
+        maybeRedirect();
+      }
+    });
+
+    try {
+      const params = new URLSearchParams(location.search);
+      const next = params.get('next');
+      if (next && /^https?:\/\//i.test(next)) {
+        window.jamesFunnelNext = next;
+      }
+    } catch {}
+  </script>  <noscript>
+    <p style="max-width:720px;margin:16px auto;color:#fff">JavaScript is required for automatic redirect when you return. You can still <a href="https://calendly.com/bagionjamesson23/30min" target="_blank" rel="noopener" style="color:#7c9eff">book here</a>.</p>
+  </noscript>
+</body>
+</html>
